@@ -8,22 +8,27 @@
 
 import Foundation
 import Combine
+import SwiftUI
+
+let halloweenTheme = CardGame<String>.Theme(name: "🎃 Halloween ", emojis: ["🎃", "👻", "☠️", "💀", "🖤", "🌕", "🌚", "🩸", "⛓", "🧡", "💚"], color: .orange)
+let sportTheme = CardGame<String>.Theme(name: "⚽️ Sports", emojis: ["🏓", "🎾", "🏀", "⛳️", "⚽️", "🎳", "🥎", "⚾️"], color: .blue)
+let facesTheme = CardGame<String>.Theme(name: "🤣 Faces", emojis: ["☺️", "🤣", "🤓", "😋", "😊", "😜", "🤪"], color: .yellow)
+let themes = [halloweenTheme, sportTheme, facesTheme]
 
 class EmojiCardGame: ObservableObject {
     @Published
     private var cardGame: CardGame<String> = EmojiCardGame.createGame()
     
     static func createGame() -> CardGame<String> {
-        var emojiCandidates = ["🤓", "🤫", "😎", "😄", "🤩", "😂", "❤️", "💦", "🕶", "🙈", "👋🏻", "☕️"]
-        let numberOfPairs = Int.random(in: 2...5)
-        let emojis: [String] = Array(0...numberOfPairs).map { _ in
+        let theme = themes.randomElement()!
+        var emojiCandidates = Array<String>(theme.emojis)
+        let emojis: [String] = Array(0..<emojiCandidates.count).map { _ in
             let removeAtIndex = Int.random(in: 0..<emojiCandidates.count)
             return emojiCandidates.remove(at: removeAtIndex)
         }
-        return CardGame(numberOfPairs: numberOfPairs) { pair in
+        return CardGame(numberOfPairs: theme.pairs, theme: theme) { pair in
             emojis[pair]
         }
-
     }
     
     // MARK: - Access to models
@@ -31,9 +36,25 @@ class EmojiCardGame: ObservableObject {
         self.cardGame.cards
     }
     
+    var score: Int {
+        self.cardGame.score
+    }
+    
+    var name: String {
+        self.cardGame.theme.name
+    }
+    
+    var color: Color {
+        self.cardGame.theme.color
+    }
+    
     // MARK: - Intent(s)
     
     func cardPressed(card: CardGame<String>.Card) {
         self.cardGame.choose(card: card)
+    }
+    
+    func newGamePressed() {
+        self.cardGame = EmojiCardGame.createGame()
     }
 }

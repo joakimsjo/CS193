@@ -14,15 +14,27 @@ struct EmojiCardGameView: View {
     var emojiGameViewModel: EmojiCardGame
     
     var body: some View {
-        Grid(emojiGameViewModel.cards) { card in
-            CardView(card: card).onTapGesture {
-                self.emojiGameViewModel.cardPressed(card: card)
+        VStack {
+            VStack {
+                Text("\(emojiGameViewModel.name.uppercased())")
+                    .font(.largeTitle)
+                Text("score: \(emojiGameViewModel.score)")
+                    .font(.body)
             }
-            .aspectRatio(2/3, contentMode: .fit)
-            .padding(5)
-            .animation(.linear)
+            .padding(.vertical)
+
+            Grid(emojiGameViewModel.cards) { card in
+                CardView(card: card, color: self.emojiGameViewModel.color).onTapGesture {
+                    self.emojiGameViewModel.cardPressed(card: card)
+                }
+                .aspectRatio(2/3, contentMode: .fit)
+                .padding(5)
+            }
+            
+            Button(action: { self.emojiGameViewModel.newGamePressed() }) {
+                Text("New Game")
+            }.padding(.vertical)
         }
-        .padding()
     }
 }
 
@@ -38,26 +50,27 @@ struct CardView: View {
         ZStack {
             if (card.isFaceUp) {
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(Color.red, lineWidth: edgeLineWidth)
+                    .stroke(color, lineWidth: edgeLineWidth)
                 Text(card.content)
+                    .animation(Animation.easeIn.delay(200))
                     .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
             } else {
                 if !card.isMatched {
                     Rectangle()
-                        .foregroundColor(Color.red)
+                        .foregroundColor(color)
                         .cornerRadius(cornerRadius)
-                    
-                    Text("E")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
                 }
             }
-        }.font(Font.system(size: fontSize(for: size)))
+        }
+        .font(Font.system(size: fontSize(for: size)))
+        .rotation3DEffect(card.isFaceUp ? Angle(degrees: 180): Angle(degrees: 0), axis: (x: CGFloat(0), y: CGFloat(15), z: CGFloat(0)))
+            .animation(.spring())
     }
     
     // MARK: - Drawing Constants
     let cornerRadius: CGFloat = 5.0
     let edgeLineWidth: CGFloat = 3
+    var color: Color = .red
     
     func fontSize(for size: CGSize) -> CGFloat {
         min(size.width, size.height) * 0.75
@@ -67,11 +80,13 @@ struct CardView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        let debugCard = CardGame<String>.Card(isFaceUp: true, content: "🍑", id: 1)
+        var debugCard = CardGame<String>.Card(isFaceUp: true, content: "🍑", id: 1)
         
         return Group {
             EmojiCardGameView(emojiGameViewModel: EmojiCardGame())
-            CardView(card: debugCard).aspectRatio(2/3,contentMode: .fit)
+            CardView(card: debugCard).aspectRatio(2/3,contentMode: .fit).onTapGesture {
+                debugCard.isFaceUp = !debugCard.isFaceUp
+            }
         }
     }
 }
