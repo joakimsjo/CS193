@@ -8,9 +8,17 @@
 
 import Foundation
 
-struct CardGame<CardContent> {
+struct CardGame<CardContent> where CardContent: Equatable {
     var cards: Array<Card>
-    var selectedCard: Card?
+    
+    var indexOfFaceUpCard: Int? {
+        get { cards.indices.filter { cards[$0].isFaceUp }.only }
+        set {
+            for index in cards.indices {
+                cards[index].isFaceUp = index == newValue
+            }
+        }
+    }
     
     init(numberOfPairs: Int, cardContentFactory: (Int) -> CardContent) {
         self.cards = []
@@ -29,18 +37,18 @@ struct CardGame<CardContent> {
     }
     
     mutating func choose(card: Card) {
-        if let i = cards.firstIndex(where: {$0.id == card.id}) {
-            self.cards[i].isFaceUp = !self.cards[i].isFaceUp
-            
-            if let selectedCard = self.selectedCard {
-                print(selectedCard)
-                print(self.cards[i])
+        if let i = cards.firstIndex(matching: card), !cards[i].isFaceUp, !cards[i].isMatched {
+            if let potentialMatchIndex = indexOfFaceUpCard {
+                if cards[i].content == cards[potentialMatchIndex].content {
+                    cards[i].isMatched = true
+                    cards[potentialMatchIndex].isMatched = true
+                }
+                self.cards[i].isFaceUp = true
             } else {
-                self.selectedCard = self.cards[i]
+                indexOfFaceUpCard = i
             }
         }
     }
-    
     
     struct Card: Identifiable {
         var isFaceUp: Bool = false

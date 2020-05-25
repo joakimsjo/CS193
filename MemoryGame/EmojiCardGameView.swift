@@ -14,14 +14,13 @@ struct EmojiCardGameView: View {
     var emojiGameViewModel: EmojiCardGame
     
     var body: some View {
-        HStack {
-            ForEach(emojiGameViewModel.cards) { card in
-                CardView(card: card).onTapGesture {
-                    self.emojiGameViewModel.cardPressed(card: card)
-                }
-                .aspectRatio(2/3, contentMode: .fit)
-                .animation(.linear)
+        Grid(emojiGameViewModel.cards) { card in
+            CardView(card: card).onTapGesture {
+                self.emojiGameViewModel.cardPressed(card: card)
             }
+            .aspectRatio(2/3, contentMode: .fit)
+            .padding(5)
+            .animation(.linear)
         }
         .padding()
     }
@@ -37,23 +36,25 @@ struct CardView: View {
     
     func body(for size: CGSize) -> some View {
         ZStack {
-            if (card.isMatched || card.isFaceUp) {
+            if (card.isFaceUp) {
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .stroke(Color.red, lineWidth: edgeLineWidth)
                 Text(card.content)
                     .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
             } else {
-                Rectangle()
-                    .foregroundColor(Color.red)
-                    .cornerRadius(cornerRadius)
-                
-                Text("E")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                if !card.isMatched {
+                    Rectangle()
+                        .foregroundColor(Color.red)
+                        .cornerRadius(cornerRadius)
+                    
+                    Text("E")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
         }.font(Font.system(size: fontSize(for: size)))
     }
-
+    
     // MARK: - Drawing Constants
     let cornerRadius: CGFloat = 5.0
     let edgeLineWidth: CGFloat = 3
