@@ -13,13 +13,6 @@ class EmojiCardGame: ObservableObject {
     @Published
     private var cardGame: CardGame<String> = EmojiCardGame.createGame()
     
-    @Published
-    var cards: Array<CardGame<String>.Card>
-    
-    init() {
-        self.cards = self.cardGame.cards
-    }
-    
     static func createGame() -> CardGame<String> {
         var emojiCandidates = ["🤓", "🤫", "😎", "😄", "🤩", "😂", "❤️", "💦", "🕶", "🙈", "👋🏻", "☕️"]
         let numberOfPairs = Int.random(in: 2...5)
@@ -33,10 +26,14 @@ class EmojiCardGame: ObservableObject {
 
     }
     
+    // MARK: - Access to models
+    var cards: [CardGame<String>.Card] {
+        self.cardGame.cards
+    }
+    
     // MARK: - Intent(s)
     
     func cardPressed(card: CardGame<String>.Card) {
         self.cardGame.choose(card: card)
-        self.cards = self.cardGame.cards
     }
 }
