@@ -14,7 +14,6 @@ struct CardGame<CardContent> where CardContent: Hashable {
     var seenCards: Set<Int>
     var score: Int = 0
     let theme: Theme
-    
     var indexOfFaceUpCard: Int? {
         get { cards.indices.filter { cards[$0].isFaceUp }.only }
         set {
