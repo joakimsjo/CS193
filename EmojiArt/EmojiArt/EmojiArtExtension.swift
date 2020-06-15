@@ -13,6 +13,14 @@ extension Collection where Element: Identifiable {
         firstIndex(where: { $0.id == element.id })
     }
     
+    func first(matching element: Element) -> Element? {
+        if let index = self.firstIndex(matching: element) {
+            return self[index]
+        } else {
+            return nil
+        }
+    }
+    
     func contains(matching element: Element) -> Bool {
         self.contains(where: { $0.id == element.id})
     }
